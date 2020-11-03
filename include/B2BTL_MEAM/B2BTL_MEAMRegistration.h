@@ -11,6 +11,9 @@
 #include <pcl/features/pfh.h>
 #include <pcl/registration/icp.h>
 
+#include "opencv2/imgcodecs/legacy/constants_c.h"
+#include "opencv2/imgproc/types_c.h"
+
 #include <unordered_map>
 
 namespace pcl
@@ -77,9 +80,9 @@ namespace pcl
 		};
 
 		using FeatureHashMapType = std::unordered_multimap<HashKeyStruct, std::pair<std::size_t, std::size_t>, HashKeyStruct>;
-      using FeatureHashMapTypePtr = shared_ptr<FeatureHashMapType>;
-      using Ptr = shared_ptr<B2BTL_MEAMHashMapSearch>;
-      using ConstPtr = shared_ptr<const B2BTL_MEAMHashMapSearch>;
+      using FeatureHashMapTypePtr = std::shared_ptr<FeatureHashMapType>;
+      using Ptr = std::shared_ptr<B2BTL_MEAMHashMapSearch>;
+      using ConstPtr = std::shared_ptr<const B2BTL_MEAMHashMapSearch>;
 
 	  using EncodedHashMapType = std::unordered_multimap<HashKeyStruct, std::vector<size_t>, HashKeyStruct>;
 	  using EncodedHashMapTypePtr = std::shared_ptr<EncodedHashMapType>;

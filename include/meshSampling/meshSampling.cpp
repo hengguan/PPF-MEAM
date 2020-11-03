@@ -158,7 +158,6 @@ void meshSampling(std::string filename, int num_samples, float input_leaf_size, 
 		pcl::io::loadPolygonFileOBJ(filename, mesh);
 	}
 		
-	
 	pcl::io::mesh2vtk(mesh, polydata1);
 
 	std::cout << "Converting mesh to PCD..." << std::endl;

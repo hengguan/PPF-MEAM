@@ -5,7 +5,7 @@
 #include <thread>
 #include <mutex>
 
-int main()
+int main(int argc, char **argv)
 {
 	//In this project, we use B2BTL - MEAM Descriptor from this paper, please read before continue:
 	//Point Pair Feature-Based Pose Estimation with Multiple Edge Appearance Models (PPF-MEAM) for Robotic Bin Picking
@@ -15,13 +15,13 @@ int main()
 	std::cout << "Descriptor type: " << descr->getType() << endl;
 	
 	//Load model
-	descr->setModelPath("../../data/model/nap.STL");
+	descr->setModelPath(argv[1]);
 	
 	std::cout << "Done Preparation ... !" << std::endl;
 
 	//Load scene cloud
 	pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZRGBA>);
-	if (pcl::io::loadPCDFile<pcl::PointXYZRGBA> ("../../data/scene/nap/scene2.pcd", *cloud) == -1) //* load the file
+	if (pcl::io::loadPCDFile<pcl::PointXYZRGBA> (argv[2], *cloud) == -1) //* load the file
     {
 		PCL_ERROR ("Couldn't read file test_pcd.pcd \n");
 		return (-1);
@@ -29,28 +29,28 @@ int main()
 	descr->storeLatestCloud(cloud);
 
 	//Load scene image
-	cv::Mat im = cv::imread("../../data/scene/nap/scene2.jpg", CV_LOAD_IMAGE_COLOR);
+	cv::Mat im = cv::imread(argv[3], CV_LOAD_IMAGE_COLOR);
 	descr->storeLatestImage(im);
 
 	//We MUST process and visualize from different thread, or the program will crash
 
 	// Start processing from different thread
-	auto _3D_Matching_Lambda = [&descr]() {
+	// auto _3D_Matching_Lambda = [&descr]() {
 		descr->prepareModelDescriptor();
 		descr->_3D_Matching();
-	};
-	std::thread _3D_Matching_Thread(_3D_Matching_Lambda);
-	std::cout << "Processing Thread Started ... !" << std::endl;
+	// };
+	// std::thread _3D_Matching_Thread(_3D_Matching_Lambda);
+	// std::cout << "Processing Thread Started ... !" << std::endl;
 	
 	// Start visualizing from different thread
 	while (!descr->customViewer.viewer->wasStopped()) {
 		descr->customViewer.viewer->spinOnce(300);
-		std::this_thread::sleep_for(std::chrono::microseconds(300000));
+		// std::this_thread::sleep_for(std::chrono::microseconds(300000));
 	}
 	 
 	//Wait for thread to finish before closing the program
-	if (_3D_Matching_Thread.joinable())
-		_3D_Matching_Thread.join();
+	// if (_3D_Matching_Thread.joinable())
+	// 	_3D_Matching_Thread.join();
 
 	return 0;
 

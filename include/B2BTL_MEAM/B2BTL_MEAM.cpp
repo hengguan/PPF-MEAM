@@ -10,8 +10,9 @@ void DescriptorB2BTL_MEAM::setModelPath(std::string model_path_)
 	model_filename_ = model_path_;
 }
 
-bool DescriptorB2BTL_MEAM::loadModel() {
-	
+bool DescriptorB2BTL_MEAM::loadModel()
+{
+
 	std::string file_extension = model_filename_.substr(model_filename_.find_last_of('.'));
 	if (file_extension == ".stl" || file_extension == ".STL")
 	{
@@ -27,14 +28,14 @@ bool DescriptorB2BTL_MEAM::loadModel() {
 		pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_xyz(new pcl::PointCloud<pcl::PointXYZ>());
 		if (pcl::io::loadPCDFile(model_filename_, *cloud_xyz) < 0)
 		{
-			
+
 			std::cout << "Error loading PCD model cloud." << std::endl;
 			return false;
 		}
 		pcl::copyPointCloud(*cloud_xyz, *model_sampling);
 		return true;
 	}
-		
+
 	std::cout << "No file name found." << std::endl;
 	return false;
 }
@@ -47,9 +48,10 @@ bool DescriptorB2BTL_MEAM::prepareModelDescriptor()
 	std::cout << "Step 1: Load STL file" << std::endl;
 	if (!loadModel())
 		return false;
-	
+
 	double diameter_model = computeCloudDiameter(model_sampling);
-	std::cout << "Diameter : " << diameter_model << std::endl << std::endl;
+	std::cout << "Diameter : " << diameter_model << std::endl
+			  << std::endl;
 
 	samp_rad = t_sampling * diameter_model;
 	norm_rad = 2 * samp_rad;
@@ -77,17 +79,17 @@ bool DescriptorB2BTL_MEAM::prepareModelDescriptor()
 	maxPt.y = avgPt.y + cube_length;
 	maxPt.z = avgPt.z + cube_length;
 
-	camera_pos[0] = { avgPt.x, minPt.y, avgPt.z };
-	camera_pos[1] = { maxPt.x, avgPt.y, avgPt.z };
-	camera_pos[2] = { avgPt.x, maxPt.y, avgPt.z };
-	camera_pos[3] = { minPt.x, avgPt.y, avgPt.z }; 
-	camera_pos[4] = { avgPt.x, avgPt.y, maxPt.z };
-	camera_pos[5] = { avgPt.x, avgPt.y, minPt.z };
+	camera_pos[0] = {avgPt.x, minPt.y, avgPt.z};
+	camera_pos[1] = {maxPt.x, avgPt.y, avgPt.z};
+	camera_pos[2] = {avgPt.x, maxPt.y, avgPt.z};
+	camera_pos[3] = {minPt.x, avgPt.y, avgPt.z};
+	camera_pos[4] = {avgPt.x, avgPt.y, maxPt.z};
+	camera_pos[5] = {avgPt.x, avgPt.y, minPt.z};
 
 	std::cout << "Preparing MEAM....." << std::endl;
 
 	b2btl_meam_hashmap_search->Lvoxel = Lvoxel_encode;
-	
+
 	for (int i = 0; i < static_cast<int>(camera_pos.size()); ++i)
 	{
 		std::cout << "Preparing Viewpoint " << i << "....." << std::endl;
@@ -104,15 +106,14 @@ bool DescriptorB2BTL_MEAM::prepareModelDescriptor()
 		ne.setSearchMethod(tree);
 		ne.setRadiusSearch(0.002f);
 		ne.compute(*normals);
-	
+
 		pcl::PointCloud<pcl::Boundary> boundaries;
 		pcl::BoundaryEstimation<pcl::PointXYZ, pcl::Normal, pcl::Boundary> est;
 		est.setInputCloud(cloud_xyz_HPR);
 		est.setInputNormals(normals);
-		est.setRadiusSearch(0.005f);   // 2cm radius
+		est.setRadiusSearch(0.005f); // 2cm radius
 		est.setSearchMethod(typename pcl::search::KdTree<pcl::PointXYZ>::Ptr(new pcl::search::KdTree<pcl::PointXYZ>));
 		est.compute(boundaries);
-
 
 		pcl::PointIndices::Ptr boundary_indices(new pcl::PointIndices());
 		for (int i = 0; i < static_cast<int>(boundaries.size()); ++i)
@@ -131,7 +132,7 @@ bool DescriptorB2BTL_MEAM::prepareModelDescriptor()
 
 		pcl::VoxelGrid<pcl::PointXYZ> vg;
 		vg.setInputCloud(EAM_XYZ);
-		vg.setLeafSize(samp_rad, samp_rad, samp_rad); 
+		vg.setLeafSize(samp_rad, samp_rad, samp_rad);
 		vg.setDownsampleAllData(true);
 		vg.filter(*EAM_XYZ);
 
@@ -155,9 +156,10 @@ bool DescriptorB2BTL_MEAM::prepareModelDescriptor()
 		customViewer.viewer->addPointCloud(cloud_xyz_HPR);
 		std::getchar();
 	}
-	
-	std::cout << "Done with Preparing Model Descriptor Offline....." << std::endl << std::endl;
-	
+
+	std::cout << "Done with Preparing Model Descriptor Offline....." << std::endl
+			  << std::endl;
+
 	return true;
 }
 
@@ -166,11 +168,10 @@ void DescriptorB2BTL_MEAM::storeLatestCloud(const PointCloudType::ConstPtr &clou
 	latestCloud = cloud->makeShared();
 }
 
-void DescriptorB2BTL_MEAM::storeLatestImage(cv::Mat& image)
+void DescriptorB2BTL_MEAM::storeLatestImage(cv::Mat &image)
 {
 	latestImage = image.clone();
 }
-
 
 void DescriptorB2BTL_MEAM::_3D_Matching()
 {
@@ -178,7 +179,7 @@ void DescriptorB2BTL_MEAM::_3D_Matching()
 	{
 		return;
 	}
-	auto start = std::chrono::high_resolution_clock::now(); 
+	auto start = std::chrono::high_resolution_clock::now();
 	//Scene
 	pcl::PointCloud<pcl::PointXYZRGB>::Ptr colored_scene = pcl::PointCloud<pcl::PointXYZRGB>::Ptr(new pcl::PointCloud<pcl::PointXYZRGB>());
 	pcl::PointCloud<pcl::PointXYZ>::Ptr captured_scene = pcl::PointCloud<pcl::PointXYZ>::Ptr(new pcl::PointCloud<pcl::PointXYZ>());
@@ -222,7 +223,6 @@ void DescriptorB2BTL_MEAM::_3D_Matching()
 	customViewer.viewer->addPointCloud(scene);
 	std::getchar();
 
-	
 	// --------------------------------------------  Edge Detection --------------------------------------------------------------
 	std::cout << "Step 5: Perform edge detection on 2D image, and trace back for 3D edge" << std::endl;
 	tt.tic();
@@ -249,13 +249,12 @@ void DescriptorB2BTL_MEAM::_3D_Matching()
 
 	tangentLine(scene_keypoints_XYZ, scene_keypoints_tangent);
 
-	
 	if (scene_keypoints_tangent->size() == 0)
 	{
 		std::cout << "No edges detected. Skipping this frame ..." << std::endl;
 		return;
 	}
-	cout <<"Voxel Grid and calculate Boundary to Boundary Tangent Line (B2B-TL) in " << tt.toc() << " mseconds..." << std::endl;
+	cout << "Voxel Grid and calculate Boundary to Boundary Tangent Line (B2B-TL) in " << tt.toc() << " mseconds..." << std::endl;
 
 	customViewer.viewer->removeAllShapes();
 	customViewer.viewer->removeAllPointClouds();
@@ -263,10 +262,7 @@ void DescriptorB2BTL_MEAM::_3D_Matching()
 	customViewer.viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 3, "scene_keypoints");
 	customViewer.viewer->addPointCloudNormals<PointXYZTangent, PointXYZTangent>(scene_keypoints_tangent, scene_keypoints_tangent, 1, 0.005, "scene_keypoints_tangent");
 	std::getchar();
-	
 
-
-	
 	// -------------------------------------------------B2B-TL MEAM ---------------------------------------------
 	std::cout << "Step 7: B2B-TL MEAM\n";
 	tt.tic();
@@ -284,13 +280,12 @@ void DescriptorB2BTL_MEAM::_3D_Matching()
 	b2btl_meam_registration.setListInputSource(MEAM);
 	b2btl_meam_registration.setInputTarget(scene_keypoints_tangent);
 
-
 	typename pcl::B2BTL_MEAMRegistration::PoseWithVotesList results;
 	b2btl_meam_registration.computeFinalPoses(results);
 	cout << "B2B MEAM Calculation in " << tt.toc() << " mseconds..." << std::endl;
 	customViewer.viewer->removeAllShapes();
 	customViewer.viewer->removeAllPointClouds();
-	
+
 	customViewer.viewer->addPointCloud<pcl::PointXYZRGB>(colored_scene, rgb, "colored_scene");
 	customViewer.viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 3, "colored_scene");
 	//Draw new Matched model-scene
@@ -306,7 +301,7 @@ void DescriptorB2BTL_MEAM::_3D_Matching()
 		pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> instance_color_handler(instance, clusterStyle.r, clusterStyle.g, clusterStyle.b);
 		customViewer.viewer->addPointCloud(instance, instance_color_handler, ss_instance.str());
 		customViewer.viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, clusterStyle.size, ss_instance.str());
-		
+
 		Eigen::Matrix4f transform = results[results_i].pose.matrix();
 		pcl::PointCloud<pcl::PointXYZ> Oz;
 		Oz.push_back(pcl::PointXYZ(0, 0, 0));
@@ -321,7 +316,6 @@ void DescriptorB2BTL_MEAM::_3D_Matching()
 				0, 0, 0, 1;
 			transform = transform * rotx180;
 		}
-
 
 		pcl::PointCloud<pcl::PointXYZ> Oxyz;
 		Oxyz.push_back(pcl::PointXYZ(0, 0, 0));
@@ -339,10 +333,9 @@ void DescriptorB2BTL_MEAM::_3D_Matching()
 	}
 	std::getchar();
 
-
 	//Prepare to write down the results
 	std::ofstream file("../../data/result/scene.txt");
-	
+
 	//----------------------------------------------------------- ICP ----------------------------------------------------
 	std::cout << "Step 8: Refine only the visible points from the result poses using ICP.\n";
 	tt.tic();
@@ -385,7 +378,8 @@ void DescriptorB2BTL_MEAM::_3D_Matching()
 
 		instances.push_back(instance);
 
-		file << "Instance " << results_i << std::endl << transformation << '\n';
+		file << "Instance " << results_i << std::endl
+			 << transformation << '\n';
 
 		std::stringstream ss_instance;
 		ss_instance << "instance_" << results_i;
@@ -394,7 +388,7 @@ void DescriptorB2BTL_MEAM::_3D_Matching()
 		pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> instance_color_handler(instance, clusterStyle.r, clusterStyle.g, clusterStyle.b);
 		customViewer.viewer->addPointCloud(instance, instance_color_handler, ss_instance.str());
 		customViewer.viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, clusterStyle.size, ss_instance.str());
-		
+
 		Eigen::Matrix4f transform = results[results_i].pose.matrix();
 		pcl::PointCloud<pcl::PointXYZ> Oz;
 		Oz.push_back(pcl::PointXYZ(0, 0, 0));
@@ -409,7 +403,6 @@ void DescriptorB2BTL_MEAM::_3D_Matching()
 				0, 0, 0, 1;
 			transform = transform * rotx180;
 		}
-
 
 		pcl::PointCloud<pcl::PointXYZ> Oxyz;
 		Oxyz.push_back(pcl::PointXYZ(0, 0, 0));
@@ -428,7 +421,6 @@ void DescriptorB2BTL_MEAM::_3D_Matching()
 	cout << "ICP in " << tt.toc() << " mseconds..." << std::endl;
 	std::getchar();
 
-
 	// ----------------------------------------- Hypothesis Verification ---------------------------------------------------
 	std::cout << "Step 9: Hypotheses Verification and Remove incorrect guesses\n";
 	tt.tic();
@@ -441,13 +433,13 @@ void DescriptorB2BTL_MEAM::_3D_Matching()
 	float hv_regularizer_ = 3.0f;
 	float hv_rad_normals_ = norm_rad;
 	bool hv_detect_clutter_ = true;
-	std::vector<bool> hypotheses_mask;  // Mask Vector to identify positive hypotheses
+	std::vector<bool> hypotheses_mask; // Mask Vector to identify positive hypotheses
 	pcl::PointCloud<pcl::PointXYZ>::Ptr segmented_scene_XYZ(new pcl::PointCloud<pcl::PointXYZ>());
 	pcl::copyPointCloud(*segmented_scene, *segmented_scene_XYZ);
 	pcl::GlobalHypothesesVerification<pcl::PointXYZ, pcl::PointXYZ> GoHv;
 
 	GoHv.setSceneCloud(segmented_scene_XYZ);
-	GoHv.addModels(instances, true);  //Models to verify
+	GoHv.addModels(instances, true); //Models to verify
 	GoHv.setResolution(hv_resolution_);
 	GoHv.setResolutionOccupancyGrid(hv_occupancy_grid_resolution_);
 	GoHv.setInlierThreshold(hv_inlier_th_);
@@ -459,7 +451,7 @@ void DescriptorB2BTL_MEAM::_3D_Matching()
 	GoHv.setRadiusNormals(hv_rad_normals_);
 
 	GoHv.verify();
-	GoHv.getMask(hypotheses_mask);  // i-element TRUE if hvModels[i] verifies hypotheses
+	GoHv.getMask(hypotheses_mask); // i-element TRUE if hvModels[i] verifies hypotheses
 
 	for (int i = 0; i < hypotheses_mask.size(); i++)
 	{
@@ -479,7 +471,8 @@ void DescriptorB2BTL_MEAM::_3D_Matching()
 	std::cout << "-------------------------------" << std::endl;
 	cout << "HV in " << tt.toc() << " mseconds..." << std::endl;
 
-	if (!customViewer.viewer->wasStopped()) {
+	if (!customViewer.viewer->wasStopped())
+	{
 		customViewer.viewer->removeAllShapes();
 		customViewer.viewer->removeAllPointClouds();
 
@@ -487,7 +480,7 @@ void DescriptorB2BTL_MEAM::_3D_Matching()
 		customViewer.viewer->addPointCloud<pcl::PointXYZ>(scene_keypoints, "scene_keypoints");
 		customViewer.viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 3, "scene_keypoints");
 		customViewer.viewer->addPointCloudNormals<PointXYZTangent, PointXYZTangent>(scene_keypoints_tangent, scene_keypoints_tangent, 1, 0.005, "scene_keypoints_tangent");
-		
+
 		//Draw new Matched model-scene
 		for (std::size_t i = 0; i < instances.size(); ++i)
 		{
@@ -499,15 +492,14 @@ void DescriptorB2BTL_MEAM::_3D_Matching()
 			customViewer.viewer->addPointCloud(instances[i], instance_color_handler, ss_instance.str());
 			customViewer.viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, clusterStyle.size, ss_instance.str());
 		}
-		
 	}
 	std::getchar();
-	
-	
+
 	// -------------------------------------------------------- Visualization --------------------------------------------------------
 	std::cout << "Show final results\n";
 	tt.tic();
-	if (!customViewer.viewer->wasStopped()) {
+	if (!customViewer.viewer->wasStopped())
+	{
 		customViewer.viewer->removeAllShapes();
 		customViewer.viewer->removeAllPointClouds();
 
@@ -515,7 +507,7 @@ void DescriptorB2BTL_MEAM::_3D_Matching()
 		customViewer.viewer->addPointCloud<pcl::PointXYZ>(scene_keypoints, "scene_keypoints");
 		customViewer.viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 3, "scene_keypoints");
 		customViewer.viewer->addPointCloudNormals<PointXYZTangent, PointXYZTangent>(scene_keypoints_tangent, scene_keypoints_tangent, 1, 0.005, "scene_keypoints_tangent");
-		
+
 		//Draw new Matched model-scene
 		for (std::size_t i = 0; i < instances.size(); ++i)
 		{
@@ -529,25 +521,24 @@ void DescriptorB2BTL_MEAM::_3D_Matching()
 				customViewer.viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, clusterStyle.size, ss_instance.str());
 			}
 		}
-		
 	}
 	cout << "Visualize in " << tt.toc() << " mseconds..." << std::endl;
 
 	auto stop = std::chrono::high_resolution_clock::now();
 
-	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start); 
-	cout << "TOTAL 3D MATCHING TIME: " << duration.count() << " mseconds!!" << endl; 
+	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+	cout << "TOTAL 3D MATCHING TIME: " << duration.count() << " mseconds!!" << endl;
 }
 
 double median(cv::Mat channel)
 {
-	double m = (channel.rows*channel.cols) / 2;
+	double m = (channel.rows * channel.cols) / 2;
 	int bin = 0;
 	double med = -1.0;
 
 	int histSize = 256;
-	float range[] = { 0, 256 };
-	const float* histRange = { range };
+	float range[] = {0, 256};
+	const float *histRange = {range};
 	bool uniform = true;
 	bool accumulate = false;
 	cv::Mat hist;
@@ -555,7 +546,7 @@ double median(cv::Mat channel)
 
 	for (int i = 0; i < histSize && med < 0.0; ++i)
 	{
-		bin += cvRound(hist.at< float >(i));
+		bin += cvRound(hist.at<float>(i));
 		if (bin > m && med < 0.0)
 			med = i;
 	}
@@ -563,7 +554,7 @@ double median(cv::Mat channel)
 	return med;
 }
 
-void DescriptorB2BTL_MEAM::cloudEdgeDetection(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& cloud_source, const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& cloud_extracted, cv::Mat image, pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud_edge)
+void DescriptorB2BTL_MEAM::cloudEdgeDetection(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &cloud_source, const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &cloud_extracted, cv::Mat image, pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud_edge)
 {
 	//Only PointXYZ is suitable
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_source_xyz(new pcl::PointCloud<pcl::PointXYZ>());
@@ -574,15 +565,15 @@ void DescriptorB2BTL_MEAM::cloudEdgeDetection(const pcl::PointCloud<pcl::PointXY
 	// Canny Edge detection 2D
 	cv::Mat src, src_gray;
 	cv::Mat detected_edges;
-	
+
 	src = image;
 	cv::cvtColor(src, src_gray, cv::COLOR_BGR2GRAY);
 	cv::blur(src_gray, src_gray, cv::Size(3, 3));
 
 	int v = median(src_gray);
 	float sigma = 0.33f;
-	int lowThreshold = std::max(0, (int)std::floor(v*(1 - sigma)));
-	int highThreshold = std::min(255, (int)std::floor(v*(1 + sigma)));
+	int lowThreshold = std::max(0, (int)std::floor(v * (1 - sigma)));
+	int highThreshold = std::min(255, (int)std::floor(v * (1 + sigma)));
 	const int kernel_size = 3;
 	Canny(src_gray, detected_edges, 20, 100, kernel_size);
 
@@ -591,8 +582,8 @@ void DescriptorB2BTL_MEAM::cloudEdgeDetection(const pcl::PointCloud<pcl::PointXY
 	for (int r = 0; r < detected_edges.rows; r++)
 		for (int c = 0; c < detected_edges.cols; c++)
 			if (detected_edges.at<uint8_t>(r, c) >= 255)
-				source_edge_indices->indices.push_back(r*detected_edges.cols + c);
-	
+				source_edge_indices->indices.push_back(r * detected_edges.cols + c);
+
 	//Get indices of edge point in extracted cloud to extracted_edge_indices
 	pcl::PointIndices::Ptr extracted_edge_indices(new pcl::PointIndices());
 	pcl::KdTreeFLANN<pcl::PointXYZ> kdtree;
@@ -605,7 +596,8 @@ void DescriptorB2BTL_MEAM::cloudEdgeDetection(const pcl::PointCloud<pcl::PointXY
 		std::vector<float> pointNKNSquaredDistance(K);
 		if (!isnan(cloud_source_xyz->at(source_edge_indices->indices.at(i)).x) && kdtree.nearestKSearch(cloud_source_xyz->at(source_edge_indices->indices.at(i)), K, pointIdxNKNSearch, pointNKNSquaredDistance) > 0)
 		{
-			if (pointNKNSquaredDistance[0] <= 0.001) {
+			if (pointNKNSquaredDistance[0] <= 0.001)
+			{
 				extracted_edge_indices->indices.push_back(pointIdxNKNSearch[0]);
 			}
 		}
@@ -619,13 +611,12 @@ void DescriptorB2BTL_MEAM::cloudEdgeDetection(const pcl::PointCloud<pcl::PointXY
 	extract_.filter(*cloud_edge);
 }
 
-void DescriptorB2BTL_MEAM::tangentLine(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& cloud_in, pcl::PointCloud<PointXYZTangent>::Ptr& cloud_out)
-{	
+void DescriptorB2BTL_MEAM::tangentLine(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &cloud_in, pcl::PointCloud<PointXYZTangent>::Ptr &cloud_out)
+{
 	pcl::PointCloud<PointXYZTangent>::Ptr cloud_tangent(new pcl::PointCloud<PointXYZTangent>());
 
 	//------------------------------ ROI of Boundary Points -----------------------------
-	
-	
+
 	//Method #1
 	/*
 	PointXYZ minPt, maxPt;
@@ -692,7 +683,7 @@ void DescriptorB2BTL_MEAM::tangentLine(const pcl::PointCloud<pcl::PointXYZ>::Con
 	}
 	*/
 	//Method #2
-	
+
 	pcl::KdTreeFLANN<pcl::PointXYZ> kdtree;
 	kdtree.setInputCloud(cloud_in);
 
@@ -744,10 +735,8 @@ void DescriptorB2BTL_MEAM::tangentLine(const pcl::PointCloud<pcl::PointXYZ>::Con
 				Pj.normal_z = t_Pj(2);
 				cloud_tangent->push_back(Pj);
 			}
-			
 		}
 	}
 	std::cout << "Edge size: " << cloud_tangent->size() << std::endl;
 	*cloud_out = *cloud_tangent;
 }
-
