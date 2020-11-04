@@ -25,8 +25,9 @@ void HPR(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &cloud_in, std::vector<f
 	std::vector<double> normp;
 	for (int j = 0; j < numPts; j++)
 	{
-		normp.push_back(sqrt(pts(j, 0) + pts(j, 1) +pts(j, 2)));
-		if (maxVal<normp[j]){
+		normp.push_back(sqrt(pts(j, 0) + pts(j, 1) + pts(j, 2)));
+		if (maxVal < normp[j])
+		{
 			maxVal = normp[j];
 		}
 	}

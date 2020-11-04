@@ -11,7 +11,7 @@ inline double uniform_deviate(int seed)
 }
 
 inline void randomPointTriangle(float a1, float a2, float a3, float b1, float b2, float b3, float c1, float c2, float c3,
-	float r1, float r2, Eigen::Vector3f& p)
+								float r1, float r2, Eigen::Vector3f &p)
 {
 	float r1sqr = std::sqrt(r1);
 	float OneMinR1Sqr = (1 - r1sqr);
@@ -30,10 +30,10 @@ inline void randomPointTriangle(float a1, float a2, float a3, float b1, float b2
 	p[2] = c3;
 }
 
-inline void randPSurface(vtkPolyData * polydata, std::vector<double> * cumulativeAreas, double totalArea, Eigen::Vector3f& p, bool calcNormal, 
-	Eigen::Vector3f& n, bool calcColor, Eigen::Vector3f& c)
+inline void randPSurface(vtkPolyData *polydata, std::vector<double> *cumulativeAreas, double totalArea, Eigen::Vector3f &p, bool calcNormal,
+						 Eigen::Vector3f &n, bool calcColor, Eigen::Vector3f &c)
 {
-	float r = static_cast<float> (uniform_deviate(rand()) * totalArea);
+	float r = static_cast<float>(uniform_deviate(rand()) * totalArea);
 
 	std::vector<double>::iterator low = std::lower_bound(cumulativeAreas->begin(), cumulativeAreas->end(), r);
 	vtkIdType el = vtkIdType(low - cumulativeAreas->begin());
@@ -53,11 +53,11 @@ inline void randPSurface(vtkPolyData * polydata, std::vector<double> * cumulativ
 		n = v1.cross(v2);
 		n.normalize();
 	}
-	float r1 = static_cast<float> (uniform_deviate(rand()));
-	float r2 = static_cast<float> (uniform_deviate(rand()));
+	float r1 = static_cast<float>(uniform_deviate(rand()));
+	float r2 = static_cast<float>(uniform_deviate(rand()));
 	randomPointTriangle(float(A[0]), float(A[1]), float(A[2]),
-		float(B[0]), float(B[1]), float(B[2]),
-		float(C[0]), float(C[1]), float(C[2]), r1, r2, p);
+						float(B[0]), float(B[1]), float(B[2]),
+						float(C[0]), float(C[1]), float(C[2]), r1, r2, p);
 
 	if (calcColor)
 	{
@@ -70,8 +70,8 @@ inline void randPSurface(vtkPolyData * polydata, std::vector<double> * cumulativ
 			colors->GetTuple(ptIds[2], cC);
 
 			randomPointTriangle(float(cA[0]), float(cA[1]), float(cA[2]),
-				float(cB[0]), float(cB[1]), float(cB[2]),
-				float(cC[0]), float(cC[1]), float(cC[2]), r1, r2, c);
+								float(cB[0]), float(cB[1]), float(cB[2]),
+								float(cC[0]), float(cC[1]), float(cC[2]), r1, r2, c);
 		}
 		else
 		{
@@ -83,8 +83,8 @@ inline void randPSurface(vtkPolyData * polydata, std::vector<double> * cumulativ
 	}
 }
 
-void uniform_sampling(vtkSmartPointer<vtkPolyData> polydata, std::size_t n_samples, bool calc_normal, bool calc_color, 
-	pcl::PointCloud<pcl::PointXYZRGBNormal> & cloud_out)
+void uniform_sampling(vtkSmartPointer<vtkPolyData> polydata, std::size_t n_samples, bool calc_normal, bool calc_color,
+					  pcl::PointCloud<pcl::PointXYZRGBNormal> &cloud_out)
 {
 	polydata->BuildCells();
 	vtkSmartPointer<vtkCellArray> cells = polydata->GetPolys();
@@ -103,7 +103,7 @@ void uniform_sampling(vtkSmartPointer<vtkPolyData> polydata, std::size_t n_sampl
 	}
 
 	cloud_out.points.resize(n_samples);
-	cloud_out.width = static_cast<std::uint32_t> (n_samples);
+	cloud_out.width = static_cast<std::uint32_t>(n_samples);
 	cloud_out.height = 1;
 
 	for (std::size_t i = 0; i < n_samples; i++)
@@ -130,7 +130,7 @@ void uniform_sampling(vtkSmartPointer<vtkPolyData> polydata, std::size_t n_sampl
 	}
 }
 
-void meshSampling(std::string filename, int num_samples, float input_leaf_size, bool write_pcd_file, pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud_out)
+void meshSampling(std::string filename, int num_samples, float input_leaf_size, bool write_pcd_file, pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud_out)
 {
 
 	// Parse command line arguments
@@ -145,19 +145,22 @@ void meshSampling(std::string filename, int num_samples, float input_leaf_size, 
 	pcl::PolygonMesh mesh;
 
 	std::string file_extension = filename.substr(filename.find_last_of('.'));
-	if (file_extension == ".ply") {
+	if (file_extension == ".ply")
+	{
 		std::cout << "Reading PLY file..." << std::endl;
 		pcl::io::loadPolygonFilePLY(filename, mesh);
 	}
-	else if (file_extension == ".stl" || file_extension == ".STL") {
+	else if (file_extension == ".stl" || file_extension == ".STL")
+	{
 		std::cout << "Reading STL file..." << std::endl;
 		pcl::io::loadPolygonFileSTL(filename, mesh);
 	}
-	else if (file_extension == ".obj") {
+	else if (file_extension == ".obj")
+	{
 		std::cout << "Reading OBJ file..." << std::endl;
 		pcl::io::loadPolygonFileOBJ(filename, mesh);
 	}
-		
+	std::cout << "convert mesh to vtk..." << std::endl;
 	pcl::io::mesh2vtk(mesh, polydata1);
 
 	std::cout << "Converting mesh to PCD..." << std::endl;
@@ -193,4 +196,3 @@ void meshSampling(std::string filename, int num_samples, float input_leaf_size, 
 	*cloud_out = *cloud_xyz;
 	std::cout << "Done Converting..." << std::endl;
 }
-

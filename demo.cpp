@@ -35,22 +35,22 @@ int main(int argc, char **argv)
 	//We MUST process and visualize from different thread, or the program will crash
 
 	// Start processing from different thread
-	// auto _3D_Matching_Lambda = [&descr]() {
+	auto _3D_Matching_Lambda = [&descr]() {
 		descr->prepareModelDescriptor();
 		descr->_3D_Matching();
-	// };
-	// std::thread _3D_Matching_Thread(_3D_Matching_Lambda);
-	// std::cout << "Processing Thread Started ... !" << std::endl;
+	};
+	std::thread _3D_Matching_Thread(_3D_Matching_Lambda);
+	std::cout << "Processing Thread Started ... !" << std::endl;
 	
 	// Start visualizing from different thread
 	while (!descr->customViewer.viewer->wasStopped()) {
 		descr->customViewer.viewer->spinOnce(300);
-		// std::this_thread::sleep_for(std::chrono::microseconds(300000));
+		std::this_thread::sleep_for(std::chrono::microseconds(300000));
 	}
 	 
 	//Wait for thread to finish before closing the program
-	// if (_3D_Matching_Thread.joinable())
-	// 	_3D_Matching_Thread.join();
+	if (_3D_Matching_Thread.joinable())
+		_3D_Matching_Thread.join();
 
 	return 0;
 

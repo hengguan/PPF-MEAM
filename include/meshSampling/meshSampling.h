@@ -24,15 +24,14 @@ extern const bool default_write_cloud;
 inline double uniform_deviate(int seed);
 
 inline void randomPointTriangle(float a1, float a2, float a3, float b1, float b2, float b3, float c1, float c2, float c3,
-	float r1, float r2, Eigen::Vector3f& p);
+								float r1, float r2, Eigen::Vector3f &p);
 
-
-inline void randPSurface(vtkPolyData * polydata, std::vector<double> * cumulativeAreas, double totalArea, Eigen::Vector3f& p,
-	bool calcNormal, Eigen::Vector3f& n, bool calcColor, Eigen::Vector3f& c);
+inline void randPSurface(vtkPolyData *polydata, std::vector<double> *cumulativeAreas, double totalArea, Eigen::Vector3f &p,
+						 bool calcNormal, Eigen::Vector3f &n, bool calcColor, Eigen::Vector3f &c);
 
 void uniform_sampling(vtkSmartPointer<vtkPolyData> polydata, std::size_t n_samples, bool calc_normal, bool calc_color,
-	pcl::PointCloud<pcl::PointXYZRGBNormal> & cloud_out);
+					  pcl::PointCloud<pcl::PointXYZRGBNormal> &cloud_out);
 
-void meshSampling(std::string filename, int num_samples, float leaf_size, bool write_pcd_file, pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud_out);
+void meshSampling(std::string filename, int num_samples, float leaf_size, bool write_pcd_file, pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud_out);
 
 #endif

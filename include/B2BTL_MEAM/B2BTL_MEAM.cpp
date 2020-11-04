@@ -154,7 +154,7 @@ bool DescriptorB2BTL_MEAM::prepareModelDescriptor()
 		customViewer.viewer->removeAllShapes();
 		customViewer.viewer->removeAllPointClouds();
 		customViewer.viewer->addPointCloud(cloud_xyz_HPR);
-		std::getchar();
+		// std::getchar();
 	}
 
 	std::cout << "Done with Preparing Model Descriptor Offline....." << std::endl
@@ -220,7 +220,9 @@ void DescriptorB2BTL_MEAM::_3D_Matching()
 	}
 	customViewer.viewer->removeAllShapes();
 	customViewer.viewer->removeAllPointClouds();
-	customViewer.viewer->addPointCloud(scene);
+	// customViewer.viewer->addPointCloud(scene);
+	customViewer.viewer->addPointCloud<pcl::PointXYZ>(scene, "colored_scene_seg");
+	customViewer.viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 3, "colored_scene_seg");
 	std::getchar();
 
 	// --------------------------------------------  Edge Detection --------------------------------------------------------------
@@ -331,20 +333,20 @@ void DescriptorB2BTL_MEAM::_3D_Matching()
 		customViewer.viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 3, ss_instance.str() + "y");
 		customViewer.viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 3, ss_instance.str() + "z");
 	}
-	std::getchar();
+	// std::getchar();
 
 	//Prepare to write down the results
-	std::ofstream file("../../data/result/scene.txt");
+	std::ofstream file("../data/result/scene.txt");
 
 	//----------------------------------------------------------- ICP ----------------------------------------------------
 	std::cout << "Step 8: Refine only the visible points from the result poses using ICP.\n";
 	tt.tic();
 	std::vector<pcl::PointCloud<pcl::PointXYZ>::ConstPtr> instances;
-	customViewer.viewer->removeAllShapes();
-	customViewer.viewer->removeAllPointClouds();
+	// customViewer.viewer->removeAllShapes();
+	// customViewer.viewer->removeAllPointClouds();
 
-	customViewer.viewer->addPointCloud<pcl::PointXYZRGB>(colored_scene, rgb, "colored_scene");
-	customViewer.viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 3, "colored_scene");
+	// customViewer.viewer->addPointCloud<pcl::PointXYZRGB>(colored_scene, rgb, "colored_scene_");
+	// customViewer.viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 3, "colored_scene_");
 	for (size_t results_i = 0; results_i < results.size(); ++results_i)
 	{
 		// Generates clouds for each instances found
@@ -384,10 +386,10 @@ void DescriptorB2BTL_MEAM::_3D_Matching()
 		std::stringstream ss_instance;
 		ss_instance << "instance_" << results_i;
 
-		CloudStyle clusterStyle = style_green;
-		pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> instance_color_handler(instance, clusterStyle.r, clusterStyle.g, clusterStyle.b);
-		customViewer.viewer->addPointCloud(instance, instance_color_handler, ss_instance.str());
-		customViewer.viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, clusterStyle.size, ss_instance.str());
+		// CloudStyle clusterStyle = style_green;
+		// pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> instance_color_handler(instance, clusterStyle.r, clusterStyle.g, clusterStyle.b);
+		// customViewer.viewer->addPointCloud(instance, instance_color_handler, ss_instance.str());
+		// customViewer.viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, clusterStyle.size, ss_instance.str());
 
 		Eigen::Matrix4f transform = results[results_i].pose.matrix();
 		pcl::PointCloud<pcl::PointXYZ> Oz;
@@ -411,15 +413,15 @@ void DescriptorB2BTL_MEAM::_3D_Matching()
 		Oxyz.push_back(pcl::PointXYZ(0, 0, 0.05));
 		pcl::transformPointCloud(Oxyz, Oxyz, transform);
 
-		customViewer.viewer->addLine<pcl::PointXYZ, pcl::PointXYZ>(Oxyz[0], Oxyz[1], 255, 0, 0, ss_instance.str() + "x");
-		customViewer.viewer->addLine<pcl::PointXYZ, pcl::PointXYZ>(Oxyz[0], Oxyz[2], 0, 255, 0, ss_instance.str() + "y");
-		customViewer.viewer->addLine<pcl::PointXYZ, pcl::PointXYZ>(Oxyz[0], Oxyz[3], 0, 0, 255, ss_instance.str() + "z");
-		customViewer.viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 3, ss_instance.str() + "x");
-		customViewer.viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 3, ss_instance.str() + "y");
-		customViewer.viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 3, ss_instance.str() + "z");
+		// customViewer.viewer->addLine<pcl::PointXYZ, pcl::PointXYZ>(Oxyz[0], Oxyz[1], 255, 0, 0, ss_instance.str() + "x");
+		// customViewer.viewer->addLine<pcl::PointXYZ, pcl::PointXYZ>(Oxyz[0], Oxyz[2], 0, 255, 0, ss_instance.str() + "y");
+		// customViewer.viewer->addLine<pcl::PointXYZ, pcl::PointXYZ>(Oxyz[0], Oxyz[3], 0, 0, 255, ss_instance.str() + "z");
+		// customViewer.viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 3, ss_instance.str() + "x");
+		// customViewer.viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 3, ss_instance.str() + "y");
+		// customViewer.viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 3, ss_instance.str() + "z");
 	}
 	cout << "ICP in " << tt.toc() << " mseconds..." << std::endl;
-	std::getchar();
+	// std::getchar();
 
 	// ----------------------------------------- Hypothesis Verification ---------------------------------------------------
 	std::cout << "Step 9: Hypotheses Verification and Remove incorrect guesses\n";
@@ -493,36 +495,36 @@ void DescriptorB2BTL_MEAM::_3D_Matching()
 			customViewer.viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, clusterStyle.size, ss_instance.str());
 		}
 	}
-	std::getchar();
+	// std::getchar();
 
 	// -------------------------------------------------------- Visualization --------------------------------------------------------
 	std::cout << "Show final results\n";
-	tt.tic();
-	if (!customViewer.viewer->wasStopped())
-	{
-		customViewer.viewer->removeAllShapes();
-		customViewer.viewer->removeAllPointClouds();
+	// tt.tic();
+	// if (!customViewer.viewer->wasStopped())
+	// {
+	// 	customViewer.viewer->removeAllShapes();
+	// 	customViewer.viewer->removeAllPointClouds();
 
-		customViewer.viewer->addPointCloud<pcl::PointXYZRGB>(colored_scene, rgb, "cloud");
-		customViewer.viewer->addPointCloud<pcl::PointXYZ>(scene_keypoints, "scene_keypoints");
-		customViewer.viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 3, "scene_keypoints");
-		customViewer.viewer->addPointCloudNormals<PointXYZTangent, PointXYZTangent>(scene_keypoints_tangent, scene_keypoints_tangent, 1, 0.005, "scene_keypoints_tangent");
+	// 	customViewer.viewer->addPointCloud<pcl::PointXYZRGB>(colored_scene, rgb, "cloud");
+	// 	customViewer.viewer->addPointCloud<pcl::PointXYZ>(scene_keypoints, "scene_keypoints");
+	// 	customViewer.viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 3, "scene_keypoints");
+	// 	customViewer.viewer->addPointCloudNormals<PointXYZTangent, PointXYZTangent>(scene_keypoints_tangent, scene_keypoints_tangent, 1, 0.005, "scene_keypoints_tangent");
 
-		//Draw new Matched model-scene
-		for (std::size_t i = 0; i < instances.size(); ++i)
-		{
-			std::stringstream ss_instance;
-			ss_instance << "instance_" << i;
-			if (show_FalsePose ? true : hypotheses_mask[i])
-			{
-				CloudStyle clusterStyle = hypotheses_mask[i] ? style_green : style_red;
-				pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> instance_color_handler(instances[i], clusterStyle.r, clusterStyle.g, clusterStyle.b);
-				customViewer.viewer->addPointCloud(instances[i], instance_color_handler, ss_instance.str());
-				customViewer.viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, clusterStyle.size, ss_instance.str());
-			}
-		}
-	}
-	cout << "Visualize in " << tt.toc() << " mseconds..." << std::endl;
+	// 	//Draw new Matched model-scene
+	// 	for (std::size_t i = 0; i < instances.size(); ++i)
+	// 	{
+	// 		std::stringstream ss_instance;
+	// 		ss_instance << "instance_" << i;
+	// 		if (show_FalsePose ? true : hypotheses_mask[i])
+	// 		{
+	// 			CloudStyle clusterStyle = hypotheses_mask[i] ? style_green : style_red;
+	// 			pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> instance_color_handler(instances[i], clusterStyle.r, clusterStyle.g, clusterStyle.b);
+	// 			customViewer.viewer->addPointCloud(instances[i], instance_color_handler, ss_instance.str());
+	// 			customViewer.viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, clusterStyle.size, ss_instance.str());
+	// 		}
+	// 	}
+	// }
+	// cout << "Visualize in " << tt.toc() << " mseconds..." << std::endl;
 
 	auto stop = std::chrono::high_resolution_clock::now();
 
